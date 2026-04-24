@@ -16,24 +16,26 @@
 
 <style>
 /* ═══════════════════════════════════════════
-   ROOT & THEME
+   ROOT & THEME — Warm Professional Palette
 ═══════════════════════════════════════════ */
 :root {
-  --bg:          #0d0f14;
-  --surface:     #151821;
-  --surface-2:   #1c2030;
-  --border:      rgba(255,255,255,0.07);
-  --accent:      #4f8ef7;
-  --accent-dim:  rgba(79,142,247,0.15);
-  --accent-2:    #38d9a9;
-  --accent-3:    #ffd43b;
-  --danger:      #ff6b6b;
-  --warn:        #ff9f43;
-  --text:        #e8eaf0;
-  --text-muted:  #7a8099;
+  --bg:          #f0f4f8;
+  --surface:     #ffffff;
+  --surface-2:   #f7f9fc;
+  --border:      rgba(0,0,0,0.08);
+  --accent:      #3b6fd4;
+  --accent-dim:  rgba(59,111,212,0.10);
+  --accent-2:    #12b886;
+  --accent-3:    #f59f00;
+  --danger:      #e03131;
+  --warn:        #e67700;
+  --text:        #1a1f36;
+  --text-muted:  #6b7a99;
   --sidebar-w:   240px;
-  --radius:      10px;
+  --radius:      12px;
   --mono:        'DM Mono', monospace;
+  --shadow-sm:   0 1px 4px rgba(0,0,0,0.07);
+  --shadow:      0 4px 20px rgba(0,0,0,0.08);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -55,19 +57,19 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(79,142,247,0.18) 0%, transparent 70%),
-              var(--bg);
+  background: linear-gradient(135deg, #e8f0fe 0%, #f0f4f8 50%, #e8f5f0 100%);
+  padding: 1rem;
 }
 .login-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 20px;
   padding: 2.5rem;
   width: 100%;
   max-width: 400px;
-  box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+  box-shadow: 0 20px 60px rgba(59,111,212,0.12);
 }
-.login-logo { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; }
+.login-logo { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.5px; color: var(--text); }
 .login-logo span { color: var(--accent); }
 
 /* ═══════════════════════════════════════════
@@ -85,6 +87,7 @@ body {
   display: flex; flex-direction: column;
   z-index: 1000;
   transition: transform 0.25s ease;
+  box-shadow: var(--shadow);
 }
 .sidebar-brand {
   padding: 1.4rem 1.5rem 1rem;
@@ -92,34 +95,36 @@ body {
   letter-spacing: -0.3px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
+  color: var(--text);
 }
 .sidebar-brand span { color: var(--accent); }
 
 .sidebar-nav { flex: 1; overflow-y: auto; padding: 0.75rem 0.75rem; }
 .nav-section-label {
-  font-size: 10px; font-weight: 600; letter-spacing: 1.2px;
+  font-size: 10px; font-weight: 700; letter-spacing: 1.4px;
   color: var(--text-muted); text-transform: uppercase;
   padding: 0.75rem 0.75rem 0.4rem;
 }
 .sidebar-nav .nav-item { margin-bottom: 2px; }
 .sidebar-nav .nav-link {
   color: var(--text-muted);
-  padding: 0.55rem 0.85rem;
-  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  border-radius: 10px;
   display: flex; align-items: center; gap: 10px;
   font-weight: 500; font-size: 13.5px;
   transition: all 0.15s;
 }
-.sidebar-nav .nav-link i { font-size: 15px; }
-.sidebar-nav .nav-link:hover { color: var(--text); background: var(--surface-2); }
+.sidebar-nav .nav-link i { font-size: 16px; }
+.sidebar-nav .nav-link:hover { color: var(--text); background: var(--bg); }
 .sidebar-nav .nav-link.active {
   color: var(--accent);
   background: var(--accent-dim);
+  font-weight: 600;
 }
 .sidebar-nav .nav-link .badge-count {
   margin-left: auto; font-size: 10px;
   background: var(--danger); color: #fff;
-  padding: 1px 6px; border-radius: 20px; font-weight: 700;
+  padding: 1px 7px; border-radius: 20px; font-weight: 700;
 }
 
 .sidebar-footer {
@@ -127,6 +132,16 @@ body {
   border-top: 1px solid var(--border);
   font-size: 12px; color: var(--text-muted);
 }
+
+/* SIDEBAR OVERLAY (mobile) */
+#sidebarOverlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 999;
+  backdrop-filter: blur(2px);
+}
+#sidebarOverlay.show { display: block; }
 
 /* MAIN */
 #mainContent {
@@ -136,14 +151,15 @@ body {
 }
 .topbar {
   position: sticky; top: 0; z-index: 100;
-  background: rgba(13,15,20,0.9);
+  background: rgba(255,255,255,0.92);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
-  padding: 0.85rem 1.75rem;
+  padding: 0.85rem 1.5rem;
   display: flex; align-items: center; justify-content: space-between;
+  box-shadow: var(--shadow-sm);
 }
-.topbar-title { font-size: 1.1rem; font-weight: 600; }
-.page-content { padding: 1.5rem 1.75rem; }
+.topbar-title { font-size: 1.05rem; font-weight: 700; color: var(--text); }
+.page-content { padding: 1.25rem 1.5rem; }
 
 /* ═══════════════════════════════════════════
    CARDS & STATS
@@ -154,20 +170,24 @@ body {
   border-radius: var(--radius);
   padding: 1.25rem 1.4rem;
   position: relative; overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s, transform 0.2s;
 }
+.stat-card:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
 .stat-card::before {
   content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: var(--accent-color, var(--accent));
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: var(--accent);
+  border-radius: var(--radius) var(--radius) 0 0;
 }
 .stat-card.green::before  { background: var(--accent-2); }
 .stat-card.yellow::before { background: var(--accent-3); }
 .stat-card.red::before    { background: var(--danger); }
 
-.stat-label { font-size: 11px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; }
+.stat-label { font-size: 11px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; }
 .stat-value { font-size: 1.75rem; font-weight: 700; font-family: var(--mono); letter-spacing: -1px; }
 .stat-sub   { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
-.stat-icon  { position: absolute; right: 1.25rem; top: 50%; transform: translateY(-50%); font-size: 2.5rem; opacity: 0.06; }
+.stat-icon  { position: absolute; right: 1.25rem; top: 50%; transform: translateY(-50%); font-size: 2.5rem; opacity: 0.07; }
 
 /* ═══════════════════════════════════════════
    CONTENT CARDS & TABLES
@@ -176,40 +196,42 @@ body {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
 }
 .card-box-header {
   padding: 1rem 1.4rem;
   border-bottom: 1px solid var(--border);
   display: flex; align-items: center; justify-content: space-between;
-  font-weight: 600; font-size: 14px;
+  font-weight: 700; font-size: 14px; color: var(--text);
+  flex-wrap: wrap; gap: 0.5rem;
 }
 
-.table-responsive { border-radius: 0 0 var(--radius) var(--radius); }
-.table { color: var(--text); margin: 0; font-size: 13px; }
+.table-responsive { border-radius: 0 0 var(--radius) var(--radius); overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.table { color: var(--text); margin: 0; font-size: 13px; min-width: 500px; }
 .table thead th {
   background: var(--surface-2);
-  color: var(--text-muted); font-weight: 600;
+  color: var(--text-muted); font-weight: 700;
   font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase;
   border-color: var(--border); padding: 0.75rem 1rem;
   white-space: nowrap;
 }
 .table tbody td { border-color: var(--border); padding: 0.75rem 1rem; vertical-align: middle; }
-.table tbody tr:hover td { background: var(--surface-2); }
+.table tbody tr:hover td { background: #f5f8ff; }
 
 /* ═══════════════════════════════════════════
    BADGES & PILLS
 ═══════════════════════════════════════════ */
 .cat-badge {
-  display: inline-block; padding: 2px 9px; border-radius: 20px;
-  font-size: 11px; font-weight: 600; letter-spacing: 0.3px;
+  display: inline-block; padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.3px;
 }
-.cat-Electrical  { background: rgba(79,142,247,0.15); color: #4f8ef7; }
-.cat-Oil         { background: rgba(255,159,67,0.15); color: #ff9f43; }
-.cat-Spare-Parts { background: rgba(56,217,169,0.15); color: #38d9a9; }
-.cat-Batteries   { background: rgba(255,107,107,0.15); color: #ff6b6b; }
+.cat-Electrical  { background: rgba(59,111,212,0.12); color: #3b6fd4; }
+.cat-Oil         { background: rgba(230,119,0,0.12); color: #e67700; }
+.cat-Spare-Parts { background: rgba(18,184,134,0.12); color: #12b886; }
+.cat-Batteries   { background: rgba(224,49,49,0.12); color: #e03131; }
 
-.stock-low  { color: var(--danger); font-weight: 600; }
-.stock-ok   { color: var(--accent-2); }
+.stock-low  { color: var(--danger); font-weight: 700; }
+.stock-ok   { color: var(--accent-2); font-weight: 600; }
 
 /* ═══════════════════════════════════════════
    FORMS
@@ -221,20 +243,20 @@ body {
   border-radius: 8px; font-size: 13.5px;
 }
 .form-control:focus, .form-select:focus {
-  background: var(--surface-2);
+  background: #fff;
   border-color: var(--accent);
   color: var(--text);
   box-shadow: 0 0 0 3px var(--accent-dim);
 }
 .form-control::placeholder { color: var(--text-muted); }
-.form-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 0.4rem; }
+.form-label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 0.4rem; }
 
 /* ═══════════════════════════════════════════
    BUTTONS
 ═══════════════════════════════════════════ */
-.btn-primary { background: var(--accent); border-color: var(--accent); font-weight: 600; }
-.btn-primary:hover { background: #3a7de8; border-color: #3a7de8; }
-.btn-sm { font-size: 12px; padding: 0.25rem 0.6rem; border-radius: 6px; }
+.btn-primary { background: var(--accent); border-color: var(--accent); font-weight: 600; color: #fff; }
+.btn-primary:hover { background: #2d5bbf; border-color: #2d5bbf; color: #fff; }
+.btn-sm { font-size: 12px; padding: 0.3rem 0.75rem; border-radius: 8px; }
 
 /* ═══════════════════════════════════════════
    MODALS
@@ -242,16 +264,19 @@ body {
 .modal-content {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 16px;
   color: var(--text);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
 }
 .modal-header {
   border-bottom: 1px solid var(--border);
   padding: 1.1rem 1.4rem;
+  background: var(--surface-2);
+  border-radius: 16px 16px 0 0;
 }
-.modal-footer { border-top: 1px solid var(--border); }
-.modal-title { font-weight: 700; font-size: 15px; }
-.btn-close { filter: invert(1) opacity(0.5); }
+.modal-footer { border-top: 1px solid var(--border); background: var(--surface-2); border-radius: 0 0 16px 16px; }
+.modal-title { font-weight: 700; font-size: 15px; color: var(--text); }
+.btn-close { opacity: 0.5; }
 
 /* ═══════════════════════════════════════════
    INVOICE LINE ITEMS
@@ -269,8 +294,9 @@ body {
    ALERTS / TOAST
 ═══════════════════════════════════════════ */
 #toastContainer {
-  position: fixed; bottom: 1.5rem; right: 1.5rem;
+  position: fixed; bottom: 1.25rem; right: 1rem;
   z-index: 9999; display: flex; flex-direction: column; gap: 8px;
+  max-width: calc(100vw - 2rem);
 }
 .toast-msg {
   background: var(--surface);
@@ -278,10 +304,11 @@ body {
   border-left: 4px solid var(--accent);
   border-radius: 10px;
   padding: 0.75rem 1rem;
-  min-width: 260px; max-width: 340px;
+  min-width: 240px; max-width: 320px;
   font-size: 13px; font-weight: 500;
   animation: slideIn 0.2s ease;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  color: var(--text);
 }
 .toast-msg.success { border-left-color: var(--accent-2); }
 .toast-msg.error   { border-left-color: var(--danger); }
@@ -294,7 +321,8 @@ body {
 #globalLoader {
   display: none;
   position: fixed; inset: 0; z-index: 9998;
-  background: rgba(0,0,0,0.5);
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(4px);
   align-items: center; justify-content: center;
 }
 #globalLoader.show { display: flex; }
@@ -317,12 +345,12 @@ body {
   padding: 0.4rem 0.75rem; font-size: 13px;
 }
 .table-search-input::placeholder { color: var(--text-muted); }
-.table-search-input:focus { outline: none; border-color: var(--accent); }
+.table-search-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
 
 .pagination .page-link {
   background: var(--surface); border-color: var(--border);
   color: var(--text-muted); font-size: 12px;
-  border-radius: 6px !important; margin: 0 2px;
+  border-radius: 8px !important; margin: 0 2px;
 }
 .pagination .page-item.active .page-link { background: var(--accent); border-color: var(--accent); color: #fff; }
 
@@ -342,10 +370,44 @@ body {
 .text-danger2  { color: var(--danger)!important; }
 .divider       { border-color: var(--border); margin: 1.25rem 0; }
 
-@media (max-width:768px){
+/* ═══════════════════════════════════════════
+   RESPONSIVE — MOBILE
+═══════════════════════════════════════════ */
+@media (max-width: 768px) {
   #sidebar { transform: translateX(-100%); }
-  #sidebar.open { transform: translateX(0); }
+  #sidebar.open { transform: translateX(0); box-shadow: 4px 0 40px rgba(0,0,0,0.15); }
   #mainContent { margin-left: 0; }
+  .page-content { padding: 1rem; }
+  .topbar { padding: 0.75rem 1rem; }
+  .stat-card .stat-value { font-size: 1.4rem; }
+  .stat-card .stat-sub { display: none; }
+  .p-3.d-flex.gap-2.flex-wrap { flex-direction: column; }
+  .p-3.d-flex.gap-2.flex-wrap > * { max-width: 100% !important; width: 100% !important; }
+  .table-search-input { max-width: 100% !important; width: 100%; }
+  .p-3.d-flex.justify-content-between { flex-direction: column; gap: 0.5rem; align-items: flex-start !important; }
+  .modal-dialog { margin: 0.5rem; }
+  .modal-content { border-radius: 14px; }
+  .line-item-row .row > [class*="col-"] { margin-bottom: 0.5rem; }
+  .card-box-header { font-size: 13px; }
+  .toast-msg { min-width: 200px; font-size: 12px; }
+  .login-card { padding: 1.75rem 1.25rem; }
+  #topbarDate { display: none; }
+}
+
+@media (max-width: 480px) {
+  .stat-value { font-size: 1.2rem !important; }
+  .page-content { padding: 0.75rem; }
+  .row.g-3 { --bs-gutter-x: 0.75rem; --bs-gutter-y: 0.75rem; }
+}
+
+/* ═══════════════════════════════════════════
+   PRINT STYLES
+═══════════════════════════════════════════ */
+@media print {
+  #sidebar, .topbar, #toastContainer, #globalLoader { display: none !important; }
+  #mainContent { margin-left: 0 !important; }
+  body { background: #fff !important; color: #000 !important; }
+  .card-box { box-shadow: none !important; border: 1px solid #ddd !important; }
 }
 </style>
 </head>
@@ -353,6 +415,9 @@ body {
 
 <!-- ═══════════════ TOAST CONTAINER ═══════════════ -->
 <div id="toastContainer"></div>
+
+<!-- ═══════════════ SIDEBAR OVERLAY (mobile) ═══════════════ -->
+<div id="sidebarOverlay"></div>
 
 <!-- ═══════════════ GLOBAL LOADER ════════════════ -->
 <div id="globalLoader"><div class="spinner-ring"></div></div>
@@ -399,6 +464,7 @@ body {
       <div class="nav-section-label">Inventory</div>
       <ul class="nav flex-column">
         <li class="nav-item"><a class="nav-link" href="#" data-page="products"><i class="bi bi-boxes"></i> Products <span class="badge-count" id="lowStockBadge" style="display:none">0</span></a></li>
+        <li class="nav-item"><a class="nav-link" href="#" data-page="categories"><i class="bi bi-tags"></i> Categories</a></li>
         <li class="nav-item"><a class="nav-link" href="#" data-page="suppliers"><i class="bi bi-building"></i> Suppliers</a></li>
       </ul>
       <div class="nav-section-label">Transactions</div>
@@ -510,7 +576,6 @@ body {
             <input type="text" class="table-search-input" id="productSearch" placeholder="Search products…" style="max-width:220px;"/>
             <select class="form-select form-select-sm" id="productCatFilter" style="max-width:160px;background:var(--surface-2);border-color:var(--border);color:var(--text)">
               <option value="">All Categories</option>
-              <option>Electrical</option><option>Oil</option><option>Spare Parts</option><option>Batteries</option>
             </select>
           </div>
           <div class="table-responsive">
@@ -530,6 +595,25 @@ body {
           </div>
         </div>
       </div><!-- /products -->
+
+      <!-- ──────── CATEGORIES ──────── -->
+      <div class="app-page" id="page-categories">
+        <div class="card-box">
+          <div class="card-box-header">
+            <span><i class="bi bi-tags me-2"></i>Categories</span>
+            <button class="btn btn-primary btn-sm" id="addCategoryBtn"><i class="bi bi-plus me-1"></i>Add Category</button>
+          </div>
+          <div class="p-3">
+            <input type="text" class="table-search-input" id="categorySearch" placeholder="Search categories…" style="max-width:220px;"/>
+          </div>
+          <div class="table-responsive">
+            <table class="table">
+              <thead><tr><th>Name</th><th>Color</th><th>Products</th><th>Actions</th></tr></thead>
+              <tbody id="categoriesTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div><!-- /categories -->
 
       <!-- ──────── SUPPLIERS ──────── -->
       <div class="app-page" id="page-suppliers">
@@ -654,6 +738,38 @@ body {
      MODALS
 ═══════════════════════════════════════════════ -->
 
+<!-- Category Modal -->
+<div class="modal fade" id="categoryModal" tabindex="-1">
+  <div class="modal-dialog modal-sm"><div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title" id="categoryModalTitle">Add Category</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="categoryId"/>
+      <div class="mb-3">
+        <label class="form-label">Category Name *</label>
+        <input type="text" class="form-control" id="catName" placeholder="e.g. Electrical"/>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Badge Color</label>
+        <div class="d-flex gap-2 flex-wrap" id="colorPicker">
+          <!-- swatches injected by JS -->
+        </div>
+        <input type="hidden" id="catColor" value="blue"/>
+      </div>
+      <div class="mt-2">
+        <label class="form-label">Preview</label><br/>
+        <span class="cat-badge" id="catPreview" style="background:rgba(59,111,212,0.12);color:#3b6fd4;">Sample</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" data-bs-dismiss="modal" style="background:var(--surface-2);border-color:var(--border);color:var(--text)">Cancel</button>
+      <button class="btn btn-primary btn-sm" id="saveCategoryBtn">Save Category</button>
+    </div>
+  </div></div>
+</div>
+
 <!-- Product Modal -->
 <div class="modal fade" id="productModal" tabindex="-1">
   <div class="modal-dialog"><div class="modal-content">
@@ -672,7 +788,6 @@ body {
           <label class="form-label">Category *</label>
           <select class="form-select" id="pCategory">
             <option value="">Select…</option>
-            <option>Electrical</option><option>Oil</option><option>Spare Parts</option><option>Batteries</option>
           </select>
         </div>
         <div class="col-6">
@@ -876,6 +991,7 @@ let state = {
   suppliers: [],
   purchases: [],
   sales: [],
+  categories: [],
   currentPage: {},
   PAGE_SIZE: 10,
 };
@@ -986,8 +1102,8 @@ $('#logoutBtn').on('click', async function(e) {
 // ═══════════════════════════════════════════
 const pageTitles = {
   dashboard: 'Dashboard', products: 'Products',
-  suppliers: 'Suppliers', purchases: 'Purchases',
-  sales: 'Sales', reports: 'Reports'
+  categories: 'Categories', suppliers: 'Suppliers',
+  purchases: 'Purchases', sales: 'Sales', reports: 'Reports'
 };
 
 function navigate(page) {
@@ -1001,10 +1117,20 @@ function navigate(page) {
 $(document).on('click', '[data-page]', function(e) {
   e.preventDefault();
   navigate($(this).data('page'));
+  if (window.innerWidth <= 768) {
+    $('#sidebar').removeClass('open');
+    $('#sidebarOverlay').removeClass('show');
+  }
 });
 
 $('#sidebarToggle').on('click', function() {
   $('#sidebar').toggleClass('open');
+  $('#sidebarOverlay').toggleClass('show');
+});
+
+$('#sidebarOverlay').on('click', function() {
+  $('#sidebar').removeClass('open');
+  $('#sidebarOverlay').removeClass('show');
 });
 
 // ═══════════════════════════════════════════
@@ -1013,21 +1139,25 @@ $('#sidebarToggle').on('click', function() {
 async function loadAllData() {
   loader(true);
   try {
-    const [p, s, pu, sa] = await Promise.all([
+    const [p, s, pu, sa, cats] = await Promise.all([
       sb.from('products').select('*').order('name'),
       sb.from('suppliers').select('*').order('name'),
       sb.from('purchases').select('*, suppliers(name), purchase_items(*, products(name, unit))').order('purchase_date', { ascending: false }),
       sb.from('sales').select('*, sales_items(*, products(name, unit))').order('sale_date', { ascending: false }),
+      sb.from('categories').select('*').order('name'),
     ]);
-    state.products  = p.data || [];
-    state.suppliers = s.data || [];
-    state.purchases = pu.data || [];
-    state.sales     = sa.data || [];
+    state.products   = p.data    || [];
+    state.suppliers  = s.data    || [];
+    state.purchases  = pu.data   || [];
+    state.sales      = sa.data   || [];
+    state.categories = cats.data || [];
     renderDashboard();
     renderProducts();
+    renderCategories();
     renderSuppliers();
     renderPurchases();
     renderSales();
+    populateCategoryDropdowns();
     populateProductDropdowns();
     populateSupplierDropdown();
   } catch (err) {
@@ -1060,7 +1190,7 @@ function renderDashboard() {
     $('#lowStockTable').html(lowStock.slice(0,8).map(p =>
       `<tr>
         <td>${p.name}</td>
-        <td><span class="cat-badge cat-${p.category.replace(' ','-')}">${p.category}</span></td>
+        <td>${renderCatBadge(p.category, getCatColor(p.category))}</td>
         <td class="stock-low mono">${p.current_stock} ${p.unit}</td>
         <td class="text-muted mono">${p.min_stock_alert}</td>
       </tr>`
@@ -1110,7 +1240,7 @@ function renderProducts() {
     $('#productsTable').html(items.map(p => `
       <tr>
         <td><strong>${p.name}</strong></td>
-        <td><span class="cat-badge cat-${p.category.replace(' ','-')}">${p.category}</span></td>
+        <td>${renderCatBadge(p.category, getCatColor(p.category))}</td>
         <td class="mono">${p.sku}</td>
         <td>${p.unit}</td>
         <td class="mono ${p.current_stock <= p.min_stock_alert ? 'stock-low' : 'stock-ok'}">${p.current_stock}</td>
@@ -1193,6 +1323,164 @@ async function deleteProduct(id) {
   loader(false);
   if (error) return toast(error.message, 'error');
   toast('Product deleted', 'success');
+  await loadAllData();
+}
+
+// ═══════════════════════════════════════════
+// CATEGORIES
+// ═══════════════════════════════════════════
+
+// Palette: name → {bg, text} CSS values
+const CAT_COLORS = {
+  blue:   { bg: 'rgba(59,111,212,0.12)',  text: '#3b6fd4' },
+  teal:   { bg: 'rgba(18,184,134,0.12)',  text: '#12b886' },
+  orange: { bg: 'rgba(230,119,0,0.12)',   text: '#e67700' },
+  red:    { bg: 'rgba(224,49,49,0.12)',   text: '#e03131' },
+  purple: { bg: 'rgba(132,94,194,0.12)',  text: '#845ec2' },
+  pink:   { bg: 'rgba(214,0,103,0.12)',   text: '#d60067' },
+  cyan:   { bg: 'rgba(12,166,197,0.12)',  text: '#0ca6c5' },
+  lime:   { bg: 'rgba(102,168,0,0.12)',   text: '#66a800' },
+};
+
+function catBadgeStyle(colorKey) {
+  const c = CAT_COLORS[colorKey] || CAT_COLORS.blue;
+  return `background:${c.bg};color:${c.text};`;
+}
+
+function renderCatBadge(name, colorKey) {
+  return `<span class="cat-badge" style="${catBadgeStyle(colorKey)}">${name}</span>`;
+}
+
+// Build color swatch picker HTML
+function buildColorSwatches(selected) {
+  return Object.entries(CAT_COLORS).map(([key, c]) => `
+    <div class="color-swatch ${key === selected ? 'selected' : ''}"
+         data-color="${key}"
+         style="width:24px;height:24px;border-radius:6px;cursor:pointer;
+                background:${c.text};border:2px solid ${key===selected?'#1a1f36':'transparent'};
+                transition:border 0.15s;"
+         title="${key}">
+    </div>
+  `).join('');
+}
+
+// Inject dynamic cat-badge styles into <head>
+function injectCatStyles() {
+  let el = document.getElementById('dynamicCatStyles');
+  if (!el) { el = document.createElement('style'); el.id = 'dynamicCatStyles'; document.head.appendChild(el); }
+  el.textContent = state.categories.map(c => {
+    const col = CAT_COLORS[c.color] || CAT_COLORS.blue;
+    const key = c.name.replace(/\s+/g, '-');
+    return `.cat-${key}{background:${col.bg};color:${col.text};}`;
+  }).join('\n');
+}
+
+function getCatColor(name) {
+  const cat = state.categories.find(c => c.name === name);
+  return cat ? cat.color : 'blue';
+}
+
+function renderCategories() {
+  injectCatStyles();
+  const q = $('#categorySearch').val().toLowerCase();
+  const items = state.categories.filter(c => !q || c.name.toLowerCase().includes(q));
+  if (items.length === 0) {
+    $('#categoriesTable').html('<tr><td colspan="4" class="text-center text-muted py-4">No categories yet. Add one to get started.</td></tr>');
+    return;
+  }
+  $('#categoriesTable').html(items.map(c => {
+    const productCount = state.products.filter(p => p.category === c.name).length;
+    return `
+      <tr>
+        <td><strong>${c.name}</strong></td>
+        <td>${renderCatBadge(c.name, c.color)}</td>
+        <td><span class="mono">${productCount}</span> product${productCount !== 1 ? 's' : ''}</td>
+        <td>
+          <button class="btn btn-sm me-1" style="background:var(--accent-dim);color:var(--accent);border:none" onclick="editCategory('${c.id}')"><i class="bi bi-pencil"></i></button>
+          <button class="btn btn-sm" style="background:rgba(224,49,49,0.12);color:var(--danger);border:none" onclick="deleteCategory('${c.id}','${c.name}',${productCount})"><i class="bi bi-trash"></i></button>
+        </td>
+      </tr>`;
+  }).join(''));
+}
+
+function populateCategoryDropdowns() {
+  injectCatStyles();
+  const opts = state.categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+  $('#pCategory').html('<option value="">Select…</option>' + opts);
+  $('#productCatFilter').html('<option value="">All Categories</option>' + opts);
+}
+
+$('#categorySearch').on('input', renderCategories);
+
+$('#addCategoryBtn').on('click', () => {
+  $('#categoryModalTitle').text('Add Category');
+  $('#categoryId').val('');
+  $('#catName').val('');
+  $('#catColor').val('blue');
+  $('#colorPicker').html(buildColorSwatches('blue'));
+  updateCatPreview();
+  new bootstrap.Modal('#categoryModal').show();
+});
+
+function editCategory(id) {
+  const c = state.categories.find(x => x.id === id);
+  if (!c) return;
+  $('#categoryModalTitle').text('Edit Category');
+  $('#categoryId').val(c.id);
+  $('#catName').val(c.name);
+  $('#catColor').val(c.color);
+  $('#colorPicker').html(buildColorSwatches(c.color));
+  updateCatPreview();
+  new bootstrap.Modal('#categoryModal').show();
+}
+
+function updateCatPreview() {
+  const color = $('#catColor').val() || 'blue';
+  const name  = $('#catName').val().trim() || 'Preview';
+  $('#catPreview').attr('style', catBadgeStyle(color)).text(name);
+}
+
+$(document).on('click', '#colorPicker .color-swatch', function() {
+  $('#colorPicker .color-swatch').css({'border-color': 'transparent'}).removeClass('selected');
+  $(this).css({'border-color': '#1a1f36'}).addClass('selected');
+  $('#catColor').val($(this).data('color'));
+  updateCatPreview();
+});
+
+$('#catName').on('input', updateCatPreview);
+
+$('#saveCategoryBtn').on('click', async () => {
+  const id    = $('#categoryId').val();
+  const name  = $('#catName').val().trim();
+  const color = $('#catColor').val() || 'blue';
+  if (!name) return toast('Category name is required', 'warn');
+  if (!id && state.categories.find(c => c.name.toLowerCase() === name.toLowerCase()))
+    return toast('Category already exists', 'warn');
+
+  loader(true);
+  let error;
+  if (id) {
+    ({ error } = await sb.from('categories').update({ name, color }).eq('id', id));
+  } else {
+    ({ error } = await sb.from('categories').insert({ name, color }));
+  }
+  loader(false);
+  if (error) return toast(error.message, 'error');
+  bootstrap.Modal.getInstance('#categoryModal')?.hide();
+  toast(id ? 'Category updated' : 'Category added', 'success');
+  await loadAllData();
+});
+
+async function deleteCategory(id, name, productCount) {
+  if (productCount > 0) {
+    return toast(`Cannot delete "${name}" — it has ${productCount} product(s). Reassign them first.`, 'warn');
+  }
+  if (!await confirm2(`Delete category "${name}"?`)) return;
+  loader(true);
+  const { error } = await sb.from('categories').delete().eq('id', id);
+  loader(false);
+  if (error) return toast(error.message, 'error');
+  toast('Category deleted', 'success');
   await loadAllData();
 }
 
@@ -1604,12 +1892,12 @@ async function runReport() {
     $('#reportTableBody').html(reportData.map(p => `
       <tr>
         <td>${p.name}</td>
-        <td><span class="cat-badge cat-${p.category.replace(' ','-')}">${p.category}</span></td>
+        <td>${renderCatBadge(p.category, getCatColor(p.category))}</td>
         <td class="mono">${p.sku}</td>
         <td>${p.unit}</td>
         <td class="mono">${p.opening_stock}</td>
         <td class="mono ${p.current_stock <= p.min_stock_alert ? 'stock-low' : 'stock-ok'}">${p.current_stock}</td>
-        <td>${p.current_stock <= p.min_stock_alert ? '<span class="cat-badge" style="background:rgba(255,107,107,0.15);color:var(--danger)">Low Stock</span>' : '<span class="cat-badge cat-Spare-Parts">OK</span>'}</td>
+        <td>${p.current_stock <= p.min_stock_alert ? '<span class="cat-badge" style="background:rgba(224,49,49,0.12);color:var(--danger)">Low Stock</span>' : '<span class="cat-badge" style="background:rgba(18,184,134,0.12);color:#12b886">OK</span>'}</td>
       </tr>
     `).join(''));
 
@@ -1630,7 +1918,7 @@ async function runReport() {
         <td>${fmtDate(r.date)}</td>
         <td>${r.supplier}</td>
         <td>${r.product}</td>
-        <td><span class="cat-badge cat-${r.category.replace(' ','-')}">${r.category}</span></td>
+        <td><span class="cat-badge" style="${catBadgeStyle(getCatColor(r.category))}">${r.category}</span></td>
         <td class="mono">${r.qty} ${r.unit}</td>
         <td class="mono">${fmt(r.price)}</td>
         <td class="mono">${fmt(r.subtotal)}</td>
@@ -1654,7 +1942,7 @@ async function runReport() {
         <td>${fmtDate(r.date)}</td>
         <td>${r.customer}</td>
         <td>${r.product}</td>
-        <td><span class="cat-badge cat-${r.category.replace(' ','-')}">${r.category}</span></td>
+        <td><span class="cat-badge" style="${catBadgeStyle(getCatColor(r.category))}">${r.category}</span></td>
         <td class="mono">${r.qty} ${r.unit}</td>
         <td class="mono">${fmt(r.price)}</td>
         <td class="mono">${fmt(r.subtotal)}</td>
