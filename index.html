@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>StockMate — Inventory Management</title>
+
+<!-- Bootstrap 5 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"/>
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+
+<style>
+/* ═══════════════════════════════════════════
+   ROOT & THEME
+═══════════════════════════════════════════ */
+:root {
+  --bg:          #0d0f14;
+  --surface:     #151821;
+  --surface-2:   #1c2030;
+  --border:      rgba(255,255,255,0.07);
+  --accent:      #4f8ef7;
+  --accent-dim:  rgba(79,142,247,0.15);
+  --accent-2:    #38d9a9;
+  --accent-3:    #ffd43b;
+  --danger:      #ff6b6b;
+  --warn:        #ff9f43;
+  --text:        #e8eaf0;
+  --text-muted:  #7a8099;
+  --sidebar-w:   240px;
+  --radius:      10px;
+  --mono:        'DM Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  margin: 0;
+  font-size: 14px;
+}
+
+/* ═══════════════════════════════════════════
+   LOGIN PAGE
+═══════════════════════════════════════════ */
+#loginPage {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(79,142,247,0.18) 0%, transparent 70%),
+              var(--bg);
+}
+.login-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+}
+.login-logo { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; }
+.login-logo span { color: var(--accent); }
+
+/* ═══════════════════════════════════════════
+   APP LAYOUT
+═══════════════════════════════════════════ */
+#appShell { display: none; min-height: 100vh; }
+
+/* SIDEBAR */
+#sidebar {
+  position: fixed; top: 0; left: 0;
+  width: var(--sidebar-w);
+  height: 100vh;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  z-index: 1000;
+  transition: transform 0.25s ease;
+}
+.sidebar-brand {
+  padding: 1.4rem 1.5rem 1rem;
+  font-size: 1.1rem; font-weight: 700;
+  letter-spacing: -0.3px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.sidebar-brand span { color: var(--accent); }
+
+.sidebar-nav { flex: 1; overflow-y: auto; padding: 0.75rem 0.75rem; }
+.nav-section-label {
+  font-size: 10px; font-weight: 600; letter-spacing: 1.2px;
+  color: var(--text-muted); text-transform: uppercase;
+  padding: 0.75rem 0.75rem 0.4rem;
+}
+.sidebar-nav .nav-item { margin-bottom: 2px; }
+.sidebar-nav .nav-link {
+  color: var(--text-muted);
+  padding: 0.55rem 0.85rem;
+  border-radius: 8px;
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 500; font-size: 13.5px;
+  transition: all 0.15s;
+}
+.sidebar-nav .nav-link i { font-size: 15px; }
+.sidebar-nav .nav-link:hover { color: var(--text); background: var(--surface-2); }
+.sidebar-nav .nav-link.active {
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+.sidebar-nav .nav-link .badge-count {
+  margin-left: auto; font-size: 10px;
+  background: var(--danger); color: #fff;
+  padding: 1px 6px; border-radius: 20px; font-weight: 700;
+}
+
+.sidebar-footer {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--border);
+  font-size: 12px; color: var(--text-muted);
+}
+
+/* MAIN */
+#mainContent {
+  margin-left: var(--sidebar-w);
+  padding: 0;
+  min-height: 100vh;
+}
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(13,15,20,0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0.85rem 1.75rem;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.topbar-title { font-size: 1.1rem; font-weight: 600; }
+.page-content { padding: 1.5rem 1.75rem; }
+
+/* ═══════════════════════════════════════════
+   CARDS & STATS
+═══════════════════════════════════════════ */
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.4rem;
+  position: relative; overflow: hidden;
+}
+.stat-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--accent-color, var(--accent));
+}
+.stat-card.green::before  { background: var(--accent-2); }
+.stat-card.yellow::before { background: var(--accent-3); }
+.stat-card.red::before    { background: var(--danger); }
+
+.stat-label { font-size: 11px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; }
+.stat-value { font-size: 1.75rem; font-weight: 700; font-family: var(--mono); letter-spacing: -1px; }
+.stat-sub   { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+.stat-icon  { position: absolute; right: 1.25rem; top: 50%; transform: translateY(-50%); font-size: 2.5rem; opacity: 0.06; }
+
+/* ═══════════════════════════════════════════
+   CONTENT CARDS & TABLES
+═══════════════════════════════════════════ */
+.card-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.card-box-header {
+  padding: 1rem 1.4rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  font-weight: 600; font-size: 14px;
+}
+
+.table-responsive { border-radius: 0 0 var(--radius) var(--radius); }
+.table { color: var(--text); margin: 0; font-size: 13px; }
+.table thead th {
+  background: var(--surface-2);
+  color: var(--text-muted); font-weight: 600;
+  font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase;
+  border-color: var(--border); padding: 0.75rem 1rem;
+  white-space: nowrap;
+}
+.table tbody td { border-color: var(--border); padding: 0.75rem 1rem; vertical-align: middle; }
+.table tbody tr:hover td { background: var(--surface-2); }
+
+/* ═══════════════════════════════════════════
+   BADGES & PILLS
+═══════════════════════════════════════════ */
+.cat-badge {
+  display: inline-block; padding: 2px 9px; border-radius: 20px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.3px;
+}
+.cat-Electrical  { background: rgba(79,142,247,0.15); color: #4f8ef7; }
+.cat-Oil         { background: rgba(255,159,67,0.15); color: #ff9f43; }
+.cat-Spare-Parts { background: rgba(56,217,169,0.15); color: #38d9a9; }
+.cat-Batteries   { background: rgba(255,107,107,0.15); color: #ff6b6b; }
+
+.stock-low  { color: var(--danger); font-weight: 600; }
+.stock-ok   { color: var(--accent-2); }
+
+/* ═══════════════════════════════════════════
+   FORMS
+═══════════════════════════════════════════ */
+.form-control, .form-select {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px; font-size: 13.5px;
+}
+.form-control:focus, .form-select:focus {
+  background: var(--surface-2);
+  border-color: var(--accent);
+  color: var(--text);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+.form-control::placeholder { color: var(--text-muted); }
+.form-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 0.4rem; }
+
+/* ═══════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════ */
+.btn-primary { background: var(--accent); border-color: var(--accent); font-weight: 600; }
+.btn-primary:hover { background: #3a7de8; border-color: #3a7de8; }
+.btn-sm { font-size: 12px; padding: 0.25rem 0.6rem; border-radius: 6px; }
+
+/* ═══════════════════════════════════════════
+   MODALS
+═══════════════════════════════════════════ */
+.modal-content {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  color: var(--text);
+}
+.modal-header {
+  border-bottom: 1px solid var(--border);
+  padding: 1.1rem 1.4rem;
+}
+.modal-footer { border-top: 1px solid var(--border); }
+.modal-title { font-weight: 700; font-size: 15px; }
+.btn-close { filter: invert(1) opacity(0.5); }
+
+/* ═══════════════════════════════════════════
+   INVOICE LINE ITEMS
+═══════════════════════════════════════════ */
+.line-item-row {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+.remove-line { cursor: pointer; color: var(--danger); }
+
+/* ═══════════════════════════════════════════
+   ALERTS / TOAST
+═══════════════════════════════════════════ */
+#toastContainer {
+  position: fixed; bottom: 1.5rem; right: 1.5rem;
+  z-index: 9999; display: flex; flex-direction: column; gap: 8px;
+}
+.toast-msg {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  min-width: 260px; max-width: 340px;
+  font-size: 13px; font-weight: 500;
+  animation: slideIn 0.2s ease;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+.toast-msg.success { border-left-color: var(--accent-2); }
+.toast-msg.error   { border-left-color: var(--danger); }
+.toast-msg.warn    { border-left-color: var(--warn); }
+@keyframes slideIn { from { transform: translateX(20px); opacity:0; } to { transform: translateX(0); opacity:1; } }
+
+/* ═══════════════════════════════════════════
+   LOADER
+═══════════════════════════════════════════ */
+#globalLoader {
+  display: none;
+  position: fixed; inset: 0; z-index: 9998;
+  background: rgba(0,0,0,0.5);
+  align-items: center; justify-content: center;
+}
+#globalLoader.show { display: flex; }
+.spinner-ring {
+  width: 44px; height: 44px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ═══════════════════════════════════════════
+   SEARCH / PAGINATION CONTROLS
+═══════════════════════════════════════════ */
+.table-search-input {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text); border-radius: 8px;
+  padding: 0.4rem 0.75rem; font-size: 13px;
+}
+.table-search-input::placeholder { color: var(--text-muted); }
+.table-search-input:focus { outline: none; border-color: var(--accent); }
+
+.pagination .page-link {
+  background: var(--surface); border-color: var(--border);
+  color: var(--text-muted); font-size: 12px;
+  border-radius: 6px !important; margin: 0 2px;
+}
+.pagination .page-item.active .page-link { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ═══════════════════════════════════════════
+   PAGES (sections)
+═══════════════════════════════════════════ */
+.app-page { display: none; }
+.app-page.active { display: block; }
+
+/* ═══════════════════════════════════════════
+   MISC
+═══════════════════════════════════════════ */
+.mono { font-family: var(--mono); font-size: 13px; }
+.text-accent   { color: var(--accent)!important; }
+.text-accent2  { color: var(--accent-2)!important; }
+.text-warn     { color: var(--warn)!important; }
+.text-danger2  { color: var(--danger)!important; }
+.divider       { border-color: var(--border); margin: 1.25rem 0; }
+
+@media (max-width:768px){
+  #sidebar { transform: translateX(-100%); }
+  #sidebar.open { transform: translateX(0); }
+  #mainContent { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ TOAST CONTAINER ═══════════════ -->
+<div id="toastContainer"></div>
+
+<!-- ═══════════════ GLOBAL LOADER ════════════════ -->
+<div id="globalLoader"><div class="spinner-ring"></div></div>
+
+<!-- ═══════════════════════════════════════════════
+     LOGIN PAGE
+═══════════════════════════════════════════════ -->
+<div id="loginPage">
+  <div class="login-card">
+    <div class="login-logo mb-1"><i class="bi bi-box-seam me-2"></i>Stock<span>Mate</span></div>
+    <p class="text-muted mb-4" style="font-size:13px;">Inventory Management System</p>
+    <div class="mb-3">
+      <label class="form-label">Email</label>
+      <input type="email" id="loginEmail" class="form-control" placeholder="admin@yourbusiness.com"/>
+    </div>
+    <div class="mb-4">
+      <label class="form-label">Password</label>
+      <input type="password" id="loginPassword" class="form-control" placeholder="••••••••"/>
+    </div>
+    <button class="btn btn-primary w-100 fw-600" id="loginBtn">
+      <i class="bi bi-lock me-2"></i>Sign In
+    </button>
+    <p class="text-center mt-3 mb-0" style="font-size:12px;color:var(--text-muted);">
+      Powered by Supabase Auth
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     APP SHELL
+═══════════════════════════════════════════════ -->
+<div id="appShell">
+
+  <!-- SIDEBAR -->
+  <nav id="sidebar">
+    <div class="sidebar-brand">
+      <i class="bi bi-box-seam text-accent me-2"></i>Stock<span>Mate</span>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section-label">Overview</div>
+      <ul class="nav flex-column">
+        <li class="nav-item"><a class="nav-link active" href="#" data-page="dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+      </ul>
+      <div class="nav-section-label">Inventory</div>
+      <ul class="nav flex-column">
+        <li class="nav-item"><a class="nav-link" href="#" data-page="products"><i class="bi bi-boxes"></i> Products <span class="badge-count" id="lowStockBadge" style="display:none">0</span></a></li>
+        <li class="nav-item"><a class="nav-link" href="#" data-page="suppliers"><i class="bi bi-building"></i> Suppliers</a></li>
+      </ul>
+      <div class="nav-section-label">Transactions</div>
+      <ul class="nav flex-column">
+        <li class="nav-item"><a class="nav-link" href="#" data-page="purchases"><i class="bi bi-cart-plus"></i> Purchases</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" data-page="sales"><i class="bi bi-receipt"></i> Sales</a></li>
+      </ul>
+      <div class="nav-section-label">Reports</div>
+      <ul class="nav flex-column">
+        <li class="nav-item"><a class="nav-link" href="#" data-page="reports"><i class="bi bi-bar-chart-line"></i> Reports</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-footer d-flex align-items-center justify-content-between">
+      <span id="sidebarUser" class="text-truncate" style="max-width:160px;"></span>
+      <a href="#" id="logoutBtn" title="Logout"><i class="bi bi-box-arrow-right" style="font-size:15px;color:var(--danger)"></i></a>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <div id="mainContent">
+    <div class="topbar">
+      <div class="d-flex align-items-center gap-3">
+        <button class="btn btn-sm d-md-none" id="sidebarToggle" style="background:var(--surface-2);color:var(--text)"><i class="bi bi-list"></i></button>
+        <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <span style="font-size:12px;color:var(--text-muted);" id="topbarDate"></span>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- ──────── DASHBOARD ──────── -->
+      <div class="app-page active" id="page-dashboard">
+        <div class="row g-3 mb-4">
+          <div class="col-6 col-md-3">
+            <div class="stat-card">
+              <div class="stat-label">Total Products</div>
+              <div class="stat-value text-accent" id="statProducts">—</div>
+              <div class="stat-sub">across all categories</div>
+              <i class="bi bi-boxes stat-icon"></i>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-card yellow">
+              <div class="stat-label">Low Stock Alerts</div>
+              <div class="stat-value" style="color:var(--warn)" id="statLowStock">—</div>
+              <div class="stat-sub">items need attention</div>
+              <i class="bi bi-exclamation-triangle stat-icon"></i>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-card green">
+              <div class="stat-label">Total Purchases</div>
+              <div class="stat-value text-accent2" id="statPurchases">—</div>
+              <div class="stat-sub">lifetime value</div>
+              <i class="bi bi-cart-plus stat-icon"></i>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-card">
+              <div class="stat-label">Total Sales</div>
+              <div class="stat-value text-accent" id="statSales">—</div>
+              <div class="stat-sub">lifetime revenue</div>
+              <i class="bi bi-receipt stat-icon"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="card-box">
+              <div class="card-box-header">
+                <span><i class="bi bi-exclamation-triangle-fill me-2 text-warn"></i>Low Stock Alerts</span>
+                <a href="#" data-page="products" class="nav-link-inline text-accent" style="font-size:12px;">View All</a>
+              </div>
+              <div class="table-responsive">
+                <table class="table">
+                  <thead><tr><th>Product</th><th>Category</th><th>Stock</th><th>Min</th></tr></thead>
+                  <tbody id="lowStockTable"><tr><td colspan="4" class="text-center text-muted py-4">Loading…</td></tr></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card-box">
+              <div class="card-box-header">
+                <span><i class="bi bi-clock-history me-2 text-accent"></i>Recent Transactions</span>
+              </div>
+              <div class="table-responsive">
+                <table class="table">
+                  <thead><tr><th>Type</th><th>Invoice</th><th>Date</th><th>Amount</th></tr></thead>
+                  <tbody id="recentTxTable"><tr><td colspan="4" class="text-center text-muted py-4">Loading…</td></tr></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /dashboard -->
+
+      <!-- ──────── PRODUCTS ──────── -->
+      <div class="app-page" id="page-products">
+        <div class="card-box">
+          <div class="card-box-header">
+            <span><i class="bi bi-boxes me-2"></i>Products</span>
+            <button class="btn btn-primary btn-sm" id="addProductBtn"><i class="bi bi-plus me-1"></i>Add Product</button>
+          </div>
+          <div class="p-3 d-flex gap-2 flex-wrap">
+            <input type="text" class="table-search-input" id="productSearch" placeholder="Search products…" style="max-width:220px;"/>
+            <select class="form-select form-select-sm" id="productCatFilter" style="max-width:160px;background:var(--surface-2);border-color:var(--border);color:var(--text)">
+              <option value="">All Categories</option>
+              <option>Electrical</option><option>Oil</option><option>Spare Parts</option><option>Batteries</option>
+            </select>
+          </div>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Product</th><th>Category</th><th>SKU</th><th>Unit</th>
+                  <th>Stock</th><th>Min Alert</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="productsTable"></tbody>
+            </table>
+          </div>
+          <div class="p-3 d-flex justify-content-between align-items-center">
+            <div id="productsPaginationInfo" style="font-size:12px;color:var(--text-muted);"></div>
+            <ul class="pagination mb-0" id="productsPagination"></ul>
+          </div>
+        </div>
+      </div><!-- /products -->
+
+      <!-- ──────── SUPPLIERS ──────── -->
+      <div class="app-page" id="page-suppliers">
+        <div class="card-box">
+          <div class="card-box-header">
+            <span><i class="bi bi-building me-2"></i>Suppliers</span>
+            <button class="btn btn-primary btn-sm" id="addSupplierBtn"><i class="bi bi-plus me-1"></i>Add Supplier</button>
+          </div>
+          <div class="p-3">
+            <input type="text" class="table-search-input" id="supplierSearch" placeholder="Search suppliers…" style="max-width:220px;"/>
+          </div>
+          <div class="table-responsive">
+            <table class="table">
+              <thead><tr><th>Name</th><th>Contact</th><th>Address</th><th>GST</th><th>Actions</th></tr></thead>
+              <tbody id="suppliersTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div><!-- /suppliers -->
+
+      <!-- ──────── PURCHASES ──────── -->
+      <div class="app-page" id="page-purchases">
+        <div class="card-box">
+          <div class="card-box-header">
+            <span><i class="bi bi-cart-plus me-2"></i>Purchases</span>
+            <button class="btn btn-primary btn-sm" id="addPurchaseBtn"><i class="bi bi-plus me-1"></i>New Purchase</button>
+          </div>
+          <div class="p-3 d-flex gap-2 flex-wrap">
+            <input type="text" class="table-search-input" id="purchaseSearch" placeholder="Search invoice…" style="max-width:200px;"/>
+            <input type="date" class="form-control form-control-sm" id="purchaseDateFrom" style="max-width:150px;" title="From"/>
+            <input type="date" class="form-control form-control-sm" id="purchaseDateTo" style="max-width:150px;" title="To"/>
+            <button class="btn btn-sm" style="background:var(--surface-2);color:var(--text);border-color:var(--border)" id="purchaseFilterBtn"><i class="bi bi-funnel me-1"></i>Filter</button>
+          </div>
+          <div class="table-responsive">
+            <table class="table">
+              <thead><tr><th>Invoice</th><th>Date</th><th>Supplier</th><th>Items</th><th>Total</th><th>Actions</th></tr></thead>
+              <tbody id="purchasesTable"></tbody>
+            </table>
+          </div>
+          <div class="p-3 d-flex justify-content-between align-items-center">
+            <div id="purchasesPaginationInfo" style="font-size:12px;color:var(--text-muted);"></div>
+            <ul class="pagination mb-0" id="purchasesPagination"></ul>
+          </div>
+        </div>
+      </div><!-- /purchases -->
+
+      <!-- ──────── SALES ──────── -->
+      <div class="app-page" id="page-sales">
+        <div class="card-box">
+          <div class="card-box-header">
+            <span><i class="bi bi-receipt me-2"></i>Sales</span>
+            <button class="btn btn-primary btn-sm" id="addSaleBtn"><i class="bi bi-plus me-1"></i>New Sale</button>
+          </div>
+          <div class="p-3 d-flex gap-2 flex-wrap">
+            <input type="text" class="table-search-input" id="saleSearch" placeholder="Search invoice…" style="max-width:200px;"/>
+            <input type="date" class="form-control form-control-sm" id="saleDateFrom" style="max-width:150px;" title="From"/>
+            <input type="date" class="form-control form-control-sm" id="saleDateTo" style="max-width:150px;" title="To"/>
+            <button class="btn btn-sm" style="background:var(--surface-2);color:var(--text);border-color:var(--border)" id="saleFilterBtn"><i class="bi bi-funnel me-1"></i>Filter</button>
+          </div>
+          <div class="table-responsive">
+            <table class="table">
+              <thead><tr><th>Invoice</th><th>Date</th><th>Customer</th><th>Items</th><th>Total</th><th>Actions</th></tr></thead>
+              <tbody id="salesTable"></tbody>
+            </table>
+          </div>
+          <div class="p-3 d-flex justify-content-between align-items-center">
+            <div id="salesPaginationInfo" style="font-size:12px;color:var(--text-muted);"></div>
+            <ul class="pagination mb-0" id="salesPagination"></ul>
+          </div>
+        </div>
+      </div><!-- /sales -->
+
+      <!-- ──────── REPORTS ──────── -->
+      <div class="app-page" id="page-reports">
+        <div class="row g-3 mb-3">
+          <div class="col-md-4">
+            <div class="card-box p-3">
+              <label class="form-label">Report Type</label>
+              <select class="form-select" id="reportType">
+                <option value="stock">Stock Report</option>
+                <option value="purchases">Purchase Report</option>
+                <option value="sales">Sales Report</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card-box p-3">
+              <label class="form-label">Date Range</label>
+              <div class="d-flex gap-2">
+                <input type="date" class="form-control form-control-sm" id="reportDateFrom"/>
+                <input type="date" class="form-control form-control-sm" id="reportDateTo"/>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card-box p-3">
+              <label class="form-label">Actions</label>
+              <div class="d-flex gap-2">
+                <button class="btn btn-primary btn-sm" id="runReportBtn"><i class="bi bi-play me-1"></i>Run</button>
+                <button class="btn btn-sm" style="background:var(--surface-2);border-color:var(--border);color:var(--text)" id="exportCsvBtn"><i class="bi bi-download me-1"></i>CSV</button>
+                <button class="btn btn-sm" style="background:var(--surface-2);border-color:var(--border);color:var(--text)" id="printReportBtn"><i class="bi bi-printer me-1"></i>Print</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-box">
+          <div class="card-box-header" id="reportTitle">Stock Report</div>
+          <div class="table-responsive">
+            <table class="table" id="reportTable">
+              <thead id="reportTableHead"></thead>
+              <tbody id="reportTableBody"><tr><td class="text-center text-muted py-4">Run a report to see data</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div><!-- /reports -->
+
+    </div><!-- /page-content -->
+  </div><!-- /mainContent -->
+</div><!-- /appShell -->
+
+<!-- ═══════════════════════════════════════════════
+     MODALS
+═══════════════════════════════════════════════ -->
+
+<!-- Product Modal -->
+<div class="modal fade" id="productModal" tabindex="-1">
+  <div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title" id="productModalTitle">Add Product</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="productId"/>
+      <div class="row g-3">
+        <div class="col-12">
+          <label class="form-label">Product Name *</label>
+          <input type="text" class="form-control" id="pName" placeholder="e.g. MCB 32A"/>
+        </div>
+        <div class="col-6">
+          <label class="form-label">Category *</label>
+          <select class="form-select" id="pCategory">
+            <option value="">Select…</option>
+            <option>Electrical</option><option>Oil</option><option>Spare Parts</option><option>Batteries</option>
+          </select>
+        </div>
+        <div class="col-6">
+          <label class="form-label">SKU / Item Code *</label>
+          <input type="text" class="form-control" id="pSku" placeholder="ELEC-001"/>
+        </div>
+        <div class="col-6">
+          <label class="form-label">Unit</label>
+          <select class="form-select" id="pUnit">
+            <option>pcs</option><option>liter</option><option>kg</option><option>roll</option><option>set</option><option>box</option>
+          </select>
+        </div>
+        <div class="col-6">
+          <label class="form-label">Min Stock Alert</label>
+          <input type="number" class="form-control" id="pMinStock" value="5" min="0"/>
+        </div>
+        <div class="col-6" id="openingStockRow">
+          <label class="form-label">Opening Stock</label>
+          <input type="number" class="form-control" id="pOpeningStock" value="0" min="0"/>
+        </div>
+        <div class="col-6">
+          <label class="form-label">Barcode (optional)</label>
+          <input type="text" class="form-control" id="pBarcode"/>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" data-bs-dismiss="modal" style="background:var(--surface-2);border-color:var(--border);color:var(--text)">Cancel</button>
+      <button class="btn btn-primary btn-sm" id="saveProductBtn">Save Product</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- Supplier Modal -->
+<div class="modal fade" id="supplierModal" tabindex="-1">
+  <div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title" id="supplierModalTitle">Add Supplier</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="supplierId"/>
+      <div class="row g-3">
+        <div class="col-12">
+          <label class="form-label">Supplier Name *</label>
+          <input type="text" class="form-control" id="sName"/>
+        </div>
+        <div class="col-6">
+          <label class="form-label">Contact</label>
+          <input type="text" class="form-control" id="sContact"/>
+        </div>
+        <div class="col-6">
+          <label class="form-label">GST Number</label>
+          <input type="text" class="form-control" id="sGst"/>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Address</label>
+          <textarea class="form-control" id="sAddress" rows="2"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" data-bs-dismiss="modal" style="background:var(--surface-2);border-color:var(--border);color:var(--text)">Cancel</button>
+      <button class="btn btn-primary btn-sm" id="saveSupplierBtn">Save Supplier</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- Purchase Modal -->
+<div class="modal fade" id="purchaseModal" tabindex="-1">
+  <div class="modal-dialog modal-lg"><div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title">New Purchase Entry</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body">
+      <div class="row g-3 mb-3">
+        <div class="col-md-4">
+          <label class="form-label">Supplier *</label>
+          <select class="form-select" id="purSupplier">
+            <option value="">Select supplier…</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Invoice No. *</label>
+          <input type="text" class="form-control" id="purInvoice" placeholder="INV-001"/>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Purchase Date *</label>
+          <input type="date" class="form-control" id="purDate"/>
+        </div>
+      </div>
+      <hr class="divider"/>
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <label class="form-label mb-0">Line Items</label>
+        <button class="btn btn-sm" style="background:var(--accent-dim);color:var(--accent);border:none" id="addPurLine"><i class="bi bi-plus me-1"></i>Add Item</button>
+      </div>
+      <div id="purLines"></div>
+      <div class="text-end mt-2" style="font-size:15px;font-weight:700;">
+        Total: <span class="text-accent mono" id="purTotal">₹0.00</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" data-bs-dismiss="modal" style="background:var(--surface-2);border-color:var(--border);color:var(--text)">Cancel</button>
+      <button class="btn btn-primary btn-sm" id="savePurchaseBtn"><i class="bi bi-save me-1"></i>Save Purchase</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- Sale Modal -->
+<div class="modal fade" id="saleModal" tabindex="-1">
+  <div class="modal-dialog modal-lg"><div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title">New Sale Entry</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body">
+      <div class="row g-3 mb-3">
+        <div class="col-md-4">
+          <label class="form-label">Customer Name</label>
+          <input type="text" class="form-control" id="salCustomer" placeholder="Optional"/>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Invoice No. *</label>
+          <input type="text" class="form-control" id="salInvoice" placeholder="SAL-001"/>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Sale Date *</label>
+          <input type="date" class="form-control" id="salDate"/>
+        </div>
+      </div>
+      <hr class="divider"/>
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <label class="form-label mb-0">Line Items</label>
+        <button class="btn btn-sm" style="background:var(--accent-dim);color:var(--accent);border:none" id="addSalLine"><i class="bi bi-plus me-1"></i>Add Item</button>
+      </div>
+      <div id="salLines"></div>
+      <div class="text-end mt-2" style="font-size:15px;font-weight:700;">
+        Total: <span class="text-accent mono" id="salTotal">₹0.00</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" data-bs-dismiss="modal" style="background:var(--surface-2);border-color:var(--border);color:var(--text)">Cancel</button>
+      <button class="btn btn-primary btn-sm" id="saveSaleBtn"><i class="bi bi-save me-1"></i>Save Sale</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- View Purchase Detail Modal -->
+<div class="modal fade" id="viewPurchaseModal" tabindex="-1">
+  <div class="modal-dialog modal-lg"><div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title">Purchase Details</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body" id="viewPurchaseBody"></div>
+  </div></div>
+</div>
+
+<!-- View Sale Detail Modal -->
+<div class="modal fade" id="viewSaleModal" tabindex="-1">
+  <div class="modal-dialog modal-lg"><div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title">Sale Details</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body" id="viewSaleBody"></div>
+  </div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SCRIPTS
+═══════════════════════════════════════════════ -->
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- jQuery -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<!-- SheetJS for Excel export -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<script>
+// ═══════════════════════════════════════════
+// ⚙️  CONFIGURATION — UPDATE THESE VALUES
+// ═══════════════════════════════════════════
+const SUPABASE_URL = 'https://xeoyemiqqfsvkutaesjv.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_eIlVQyqR10w8vvykYNI0wg_F8O_Jc9g';
+
+// ═══════════════════════════════════════════
+// SUPABASE CLIENT
+// ═══════════════════════════════════════════
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let state = {
+  products: [],
+  suppliers: [],
+  purchases: [],
+  sales: [],
+  currentPage: {},
+  PAGE_SIZE: 10,
+};
+
+// ═══════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════
+const fmt = n => '₹' + parseFloat(n || 0).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+const fmtDate = d => d ? new Date(d).toLocaleDateString('en-IN') : '—';
+const today = () => new Date().toISOString().split('T')[0];
+
+function loader(show) {
+  document.getElementById('globalLoader').classList.toggle('show', show);
+}
+
+function toast(msg, type = 'info') {
+  const el = document.createElement('div');
+  el.className = `toast-msg ${type}`;
+  const icons = { success: 'bi-check-circle-fill', error: 'bi-x-circle-fill', warn: 'bi-exclamation-circle-fill', info: 'bi-info-circle-fill' };
+  el.innerHTML = `<i class="bi ${icons[type] || icons.info} me-2"></i>${msg}`;
+  document.getElementById('toastContainer').appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+function confirm2(msg) {
+  return new Promise(res => res(window.confirm(msg)));
+}
+
+// Pagination helper
+function paginate(data, page, pageSize) {
+  const start = (page - 1) * pageSize;
+  return data.slice(start, start + pageSize);
+}
+
+function renderPagination(containerId, infoId, total, currentPage, pageSize, onPageChange) {
+  const pages = Math.ceil(total / pageSize);
+  const info = document.getElementById(infoId);
+  const container = document.getElementById(containerId);
+  if (info) info.textContent = `Showing ${Math.min((currentPage-1)*pageSize+1, total)}–${Math.min(currentPage*pageSize, total)} of ${total}`;
+  if (!container) return;
+  let html = '';
+  const range = (a, b) => Array.from({length: b-a+1}, (_, i) => a+i);
+  const pages_arr = pages <= 7 ? range(1, pages) :
+    currentPage <= 4 ? [...range(1, 5), '…', pages] :
+    currentPage >= pages - 3 ? [1, '…', ...range(pages-4, pages)] :
+    [1, '…', currentPage-1, currentPage, currentPage+1, '…', pages];
+
+  html += `<li class="page-item ${currentPage===1?'disabled':''}"><a class="page-link" data-p="${currentPage-1}">‹</a></li>`;
+  pages_arr.forEach(p => {
+    if (p === '…') html += `<li class="page-item disabled"><span class="page-link">…</span></li>`;
+    else html += `<li class="page-item ${p===currentPage?'active':''}"><a class="page-link" data-p="${p}">${p}</a></li>`;
+  });
+  html += `<li class="page-item ${currentPage===pages?'disabled':''}"><a class="page-link" data-p="${currentPage+1}">›</a></li>`;
+  container.innerHTML = html;
+  container.querySelectorAll('[data-p]').forEach(el => {
+    el.addEventListener('click', e => {
+      e.preventDefault();
+      const p = parseInt(el.dataset.p);
+      if (p >= 1 && p <= pages) onPageChange(p);
+    });
+  });
+}
+
+// ═══════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════
+async function initAuth() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) showApp(session.user);
+  else showLogin();
+
+  sb.auth.onAuthStateChange((event, session) => {
+    if (session) showApp(session.user);
+    else showLogin();
+  });
+}
+
+function showLogin() {
+  document.getElementById('loginPage').style.display = 'flex';
+  document.getElementById('appShell').style.display = 'none';
+}
+
+function showApp(user) {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('appShell').style.display = 'block';
+  document.getElementById('sidebarUser').textContent = user.email;
+  document.getElementById('topbarDate').textContent = new Date().toLocaleDateString('en-IN', { weekday:'short', year:'numeric', month:'short', day:'numeric' });
+  loadAllData();
+}
+
+$('#loginBtn').on('click', async function() {
+  const email = $('#loginEmail').val().trim();
+  const pass  = $('#loginPassword').val().trim();
+  if (!email || !pass) return toast('Enter email and password', 'warn');
+  loader(true);
+  const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+  loader(false);
+  if (error) toast(error.message, 'error');
+});
+
+$('#logoutBtn').on('click', async function(e) {
+  e.preventDefault();
+  await sb.auth.signOut();
+});
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+const pageTitles = {
+  dashboard: 'Dashboard', products: 'Products',
+  suppliers: 'Suppliers', purchases: 'Purchases',
+  sales: 'Sales', reports: 'Reports'
+};
+
+function navigate(page) {
+  document.querySelectorAll('.app-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-nav .nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('page-' + page)?.classList.add('active');
+  document.querySelector(`[data-page="${page}"]`)?.classList.add('active');
+  document.getElementById('topbarTitle').textContent = pageTitles[page] || page;
+}
+
+$(document).on('click', '[data-page]', function(e) {
+  e.preventDefault();
+  navigate($(this).data('page'));
+});
+
+$('#sidebarToggle').on('click', function() {
+  $('#sidebar').toggleClass('open');
+});
+
+// ═══════════════════════════════════════════
+// LOAD ALL DATA
+// ═══════════════════════════════════════════
+async function loadAllData() {
+  loader(true);
+  try {
+    const [p, s, pu, sa] = await Promise.all([
+      sb.from('products').select('*').order('name'),
+      sb.from('suppliers').select('*').order('name'),
+      sb.from('purchases').select('*, suppliers(name), purchase_items(*, products(name, unit))').order('purchase_date', { ascending: false }),
+      sb.from('sales').select('*, sales_items(*, products(name, unit))').order('sale_date', { ascending: false }),
+    ]);
+    state.products  = p.data || [];
+    state.suppliers = s.data || [];
+    state.purchases = pu.data || [];
+    state.sales     = sa.data || [];
+    renderDashboard();
+    renderProducts();
+    renderSuppliers();
+    renderPurchases();
+    renderSales();
+    populateProductDropdowns();
+    populateSupplierDropdown();
+  } catch (err) {
+    toast('Failed to load data: ' + err.message, 'error');
+  }
+  loader(false);
+}
+
+// ═══════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════
+function renderDashboard() {
+  const lowStock = state.products.filter(p => p.current_stock <= p.min_stock_alert);
+  const totalPurchases = state.purchases.reduce((s, p) => s + (p.total_amount || 0), 0);
+  const totalSales = state.sales.reduce((s, sa) => s + (sa.total_amount || 0), 0);
+
+  $('#statProducts').text(state.products.length);
+  $('#statLowStock').text(lowStock.length);
+  $('#statPurchases').text(fmt(totalPurchases));
+  $('#statSales').text(fmt(totalSales));
+
+  // Low stock badge
+  if (lowStock.length > 0) { $('#lowStockBadge').text(lowStock.length).show(); }
+  else $('#lowStockBadge').hide();
+
+  // Low stock table
+  if (lowStock.length === 0) {
+    $('#lowStockTable').html('<tr><td colspan="4" class="text-center text-muted py-3"><i class="bi bi-check-circle-fill text-accent2 me-2"></i>All products have sufficient stock</td></tr>');
+  } else {
+    $('#lowStockTable').html(lowStock.slice(0,8).map(p =>
+      `<tr>
+        <td>${p.name}</td>
+        <td><span class="cat-badge cat-${p.category.replace(' ','-')}">${p.category}</span></td>
+        <td class="stock-low mono">${p.current_stock} ${p.unit}</td>
+        <td class="text-muted mono">${p.min_stock_alert}</td>
+      </tr>`
+    ).join(''));
+  }
+
+  // Recent transactions (last 5 each)
+  const txs = [
+    ...state.purchases.slice(0,5).map(p => ({ type:'Purchase', invoice: p.invoice_number, date: p.purchase_date, amount: p.total_amount })),
+    ...state.sales.slice(0,5).map(s => ({ type:'Sale', invoice: s.invoice_number, date: s.sale_date, amount: s.total_amount })),
+  ].sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0,8);
+
+  if (txs.length === 0) {
+    $('#recentTxTable').html('<tr><td colspan="4" class="text-center text-muted py-3">No transactions yet</td></tr>');
+  } else {
+    $('#recentTxTable').html(txs.map(t =>
+      `<tr>
+        <td><span class="cat-badge ${t.type==='Purchase'?'cat-Electrical':'cat-Oil'}">${t.type}</span></td>
+        <td class="mono">${t.invoice}</td>
+        <td>${fmtDate(t.date)}</td>
+        <td class="mono">${fmt(t.amount)}</td>
+      </tr>`
+    ).join(''));
+  }
+}
+
+// ═══════════════════════════════════════════
+// PRODUCTS
+// ═══════════════════════════════════════════
+let productPage = 1;
+
+function getFilteredProducts() {
+  const q   = $('#productSearch').val().toLowerCase();
+  const cat = $('#productCatFilter').val();
+  return state.products.filter(p =>
+    (!q || p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q)) &&
+    (!cat || p.category === cat)
+  );
+}
+
+function renderProducts() {
+  const filtered = getFilteredProducts();
+  const items = paginate(filtered, productPage, state.PAGE_SIZE);
+  if (items.length === 0) {
+    $('#productsTable').html('<tr><td colspan="7" class="text-center text-muted py-4">No products found</td></tr>');
+  } else {
+    $('#productsTable').html(items.map(p => `
+      <tr>
+        <td><strong>${p.name}</strong></td>
+        <td><span class="cat-badge cat-${p.category.replace(' ','-')}">${p.category}</span></td>
+        <td class="mono">${p.sku}</td>
+        <td>${p.unit}</td>
+        <td class="mono ${p.current_stock <= p.min_stock_alert ? 'stock-low' : 'stock-ok'}">${p.current_stock}</td>
+        <td class="mono text-muted">${p.min_stock_alert}</td>
+        <td>
+          <button class="btn btn-sm me-1" style="background:var(--accent-dim);color:var(--accent);border:none" onclick="editProduct('${p.id}')"><i class="bi bi-pencil"></i></button>
+          <button class="btn btn-sm" style="background:rgba(255,107,107,0.15);color:var(--danger);border:none" onclick="deleteProduct('${p.id}')"><i class="bi bi-trash"></i></button>
+        </td>
+      </tr>
+    `).join(''));
+  }
+  renderPagination('productsPagination','productsPaginationInfo', filtered.length, productPage, state.PAGE_SIZE, p => { productPage=p; renderProducts(); });
+}
+
+$('#productSearch, #productCatFilter').on('input change', () => { productPage=1; renderProducts(); });
+
+$('#addProductBtn').on('click', () => {
+  $('#productModalTitle').text('Add Product');
+  $('#productId').val('');
+  $('#pName,#pSku,#pBarcode').val('');
+  $('#pCategory').val('');
+  $('#pUnit').val('pcs');
+  $('#pMinStock').val(5);
+  $('#pOpeningStock').val(0);
+  $('#openingStockRow').show();
+  new bootstrap.Modal('#productModal').show();
+});
+
+function editProduct(id) {
+  const p = state.products.find(x => x.id === id);
+  if (!p) return;
+  $('#productModalTitle').text('Edit Product');
+  $('#productId').val(p.id);
+  $('#pName').val(p.name);
+  $('#pCategory').val(p.category);
+  $('#pSku').val(p.sku);
+  $('#pUnit').val(p.unit);
+  $('#pMinStock').val(p.min_stock_alert);
+  $('#pOpeningStock').val(p.opening_stock);
+  $('#pBarcode').val(p.barcode || '');
+  $('#openingStockRow').hide();
+  new bootstrap.Modal('#productModal').show();
+}
+
+$('#saveProductBtn').on('click', async () => {
+  const id   = $('#productId').val();
+  const name = $('#pName').val().trim();
+  const cat  = $('#pCategory').val();
+  const sku  = $('#pSku').val().trim();
+  if (!name || !cat || !sku) return toast('Name, Category and SKU are required', 'warn');
+
+  const payload = {
+    name, category: cat, sku,
+    unit: $('#pUnit').val(),
+    min_stock_alert: parseFloat($('#pMinStock').val()) || 0,
+    barcode: $('#pBarcode').val() || null,
+  };
+
+  loader(true);
+  let error;
+  if (id) {
+    ({ error } = await sb.from('products').update(payload).eq('id', id));
+  } else {
+    const opening = parseFloat($('#pOpeningStock').val()) || 0;
+    payload.opening_stock = opening;
+    payload.current_stock = opening;
+    ({ error } = await sb.from('products').insert(payload));
+  }
+  loader(false);
+  if (error) return toast(error.message, 'error');
+  bootstrap.Modal.getInstance('#productModal')?.hide();
+  toast(id ? 'Product updated' : 'Product added', 'success');
+  await loadAllData();
+});
+
+async function deleteProduct(id) {
+  if (!await confirm2('Delete this product? This cannot be undone.')) return;
+  loader(true);
+  const { error } = await sb.from('products').delete().eq('id', id);
+  loader(false);
+  if (error) return toast(error.message, 'error');
+  toast('Product deleted', 'success');
+  await loadAllData();
+}
+
+// ═══════════════════════════════════════════
+// SUPPLIERS
+// ═══════════════════════════════════════════
+function renderSuppliers() {
+  const q = $('#supplierSearch').val().toLowerCase();
+  const items = state.suppliers.filter(s => !q || s.name.toLowerCase().includes(q));
+  if (items.length === 0) {
+    $('#suppliersTable').html('<tr><td colspan="5" class="text-center text-muted py-4">No suppliers found</td></tr>');
+  } else {
+    $('#suppliersTable').html(items.map(s => `
+      <tr>
+        <td><strong>${s.name}</strong></td>
+        <td>${s.contact || '—'}</td>
+        <td>${s.address || '—'}</td>
+        <td class="mono">${s.gst || '—'}</td>
+        <td>
+          <button class="btn btn-sm me-1" style="background:var(--accent-dim);color:var(--accent);border:none" onclick="editSupplier('${s.id}')"><i class="bi bi-pencil"></i></button>
+          <button class="btn btn-sm" style="background:rgba(255,107,107,0.15);color:var(--danger);border:none" onclick="deleteSupplier('${s.id}')"><i class="bi bi-trash"></i></button>
+        </td>
+      </tr>
+    `).join(''));
+  }
+}
+
+$('#supplierSearch').on('input', renderSuppliers);
+
+$('#addSupplierBtn').on('click', () => {
+  $('#supplierModalTitle').text('Add Supplier');
+  $('#supplierId').val('');
+  $('#sName,#sContact,#sGst,#sAddress').val('');
+  new bootstrap.Modal('#supplierModal').show();
+});
+
+function editSupplier(id) {
+  const s = state.suppliers.find(x => x.id === id);
+  if (!s) return;
+  $('#supplierModalTitle').text('Edit Supplier');
+  $('#supplierId').val(s.id);
+  $('#sName').val(s.name);
+  $('#sContact').val(s.contact || '');
+  $('#sGst').val(s.gst || '');
+  $('#sAddress').val(s.address || '');
+  new bootstrap.Modal('#supplierModal').show();
+}
+
+$('#saveSupplierBtn').on('click', async () => {
+  const id   = $('#supplierId').val();
+  const name = $('#sName').val().trim();
+  if (!name) return toast('Supplier name is required', 'warn');
+  const payload = { name, contact: $('#sContact').val(), gst: $('#sGst').val(), address: $('#sAddress').val() };
+  loader(true);
+  let error;
+  if (id) ({ error } = await sb.from('suppliers').update(payload).eq('id', id));
+  else ({ error } = await sb.from('suppliers').insert(payload));
+  loader(false);
+  if (error) return toast(error.message, 'error');
+  bootstrap.Modal.getInstance('#supplierModal')?.hide();
+  toast(id ? 'Supplier updated' : 'Supplier added', 'success');
+  await loadAllData();
+});
+
+async function deleteSupplier(id) {
+  if (!await confirm2('Delete this supplier?')) return;
+  loader(true);
+  const { error } = await sb.from('suppliers').delete().eq('id', id);
+  loader(false);
+  if (error) return toast(error.message, 'error');
+  toast('Supplier deleted', 'success');
+  await loadAllData();
+}
+
+function populateSupplierDropdown() {
+  const opts = state.suppliers.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+  $('#purSupplier').html('<option value="">Select supplier…</option>' + opts);
+}
+
+// ═══════════════════════════════════════════
+// LINE ITEMS (shared for purchase + sale)
+// ═══════════════════════════════════════════
+function productOptions(selected = '') {
+  return state.products.map(p =>
+    `<option value="${p.id}" data-unit="${p.unit}" data-stock="${p.current_stock}" ${p.id===selected?'selected':''}>${p.name} (${p.current_stock} ${p.unit})</option>`
+  ).join('');
+}
+
+function buildLineHtml(prefix, idx) {
+  return `
+    <div class="line-item-row" id="${prefix}Line${idx}">
+      <div class="row g-2 align-items-end">
+        <div class="col-md-5">
+          <label class="form-label">Product</label>
+          <select class="form-select form-select-sm line-product" data-prefix="${prefix}" data-idx="${idx}">
+            <option value="">Select…</option>${productOptions()}
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Qty</label>
+          <input type="number" class="form-control form-control-sm line-qty" min="0.01" step="0.01" value="1" data-prefix="${prefix}" data-idx="${idx}"/>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Price / Unit</label>
+          <input type="number" class="form-control form-control-sm line-price" min="0" step="0.01" value="0" data-prefix="${prefix}" data-idx="${idx}"/>
+        </div>
+        <div class="col-md-2 d-flex align-items-end gap-2">
+          <div class="mono" id="${prefix}Sub${idx}" style="font-size:13px;color:var(--text-muted)">₹0</div>
+          <i class="bi bi-x-circle remove-line" onclick="removeLine('${prefix}',${idx})"></i>
+        </div>
+      </div>
+    </div>`;
+}
+
+let purLineCount = 0, salLineCount = 0;
+
+function addLine(prefix) {
+  const idx = prefix === 'pur' ? ++purLineCount : ++salLineCount;
+  $(`#${prefix}Lines`).append(buildLineHtml(prefix, idx));
+}
+
+function removeLine(prefix, idx) {
+  $(`#${prefix}Line${idx}`).remove();
+  calcTotal(prefix);
+}
+
+function calcTotal(prefix) {
+  let total = 0;
+  $(`#${prefix}Lines .line-item-row`).each(function() {
+    const qty   = parseFloat($(this).find('.line-qty').val()) || 0;
+    const price = parseFloat($(this).find('.line-price').val()) || 0;
+    const sub   = qty * price;
+    const idx   = $(this).attr('id').replace(prefix + 'Line','');
+    $(`#${prefix}Sub${idx}`).text(fmt(sub));
+    total += sub;
+  });
+  $(`#${prefix}Total`).text(fmt(total));
+}
+
+$(document).on('input', '.line-qty, .line-price', function() {
+  calcTotal($(this).data('prefix'));
+});
+
+function getLines(prefix) {
+  const lines = [];
+  $(`#${prefix}Lines .line-item-row`).each(function() {
+    const product_id = $(this).find('.line-product').val();
+    const quantity   = parseFloat($(this).find('.line-qty').val());
+    const price      = parseFloat($(this).find('.line-price').val());
+    if (product_id && quantity > 0) lines.push({ product_id, quantity, price });
+  });
+  return lines;
+}
+
+function populateProductDropdowns() {
+  // Refresh any open line selects
+  $('.line-product').each(function() {
+    const val = $(this).val();
+    $(this).html('<option value="">Select…</option>' + productOptions(val));
+  });
+}
+
+// ═══════════════════════════════════════════
+// PURCHASES
+// ═══════════════════════════════════════════
+let purchasePage = 1;
+
+function getFilteredPurchases() {
+  const q   = $('#purchaseSearch').val().toLowerCase();
+  const df  = $('#purchaseDateFrom').val();
+  const dt  = $('#purchaseDateTo').val();
+  return state.purchases.filter(p =>
+    (!q || p.invoice_number.toLowerCase().includes(q) || (p.suppliers?.name || '').toLowerCase().includes(q)) &&
+    (!df || p.purchase_date >= df) &&
+    (!dt || p.purchase_date <= dt)
+  );
+}
+
+function renderPurchases() {
+  const filtered = getFilteredPurchases();
+  const items = paginate(filtered, purchasePage, state.PAGE_SIZE);
+  if (items.length === 0) {
+    $('#purchasesTable').html('<tr><td colspan="6" class="text-center text-muted py-4">No purchases found</td></tr>');
+  } else {
+    $('#purchasesTable').html(items.map(p => `
+      <tr>
+        <td class="mono">${p.invoice_number}</td>
+        <td>${fmtDate(p.purchase_date)}</td>
+        <td>${p.suppliers?.name || '—'}</td>
+        <td>${(p.purchase_items || []).length} item(s)</td>
+        <td class="mono text-accent2">${fmt(p.total_amount)}</td>
+        <td>
+          <button class="btn btn-sm" style="background:var(--accent-dim);color:var(--accent);border:none" onclick="viewPurchase('${p.id}')"><i class="bi bi-eye"></i></button>
+          <button class="btn btn-sm ms-1" style="background:rgba(255,107,107,0.15);color:var(--danger);border:none" onclick="deletePurchase('${p.id}')"><i class="bi bi-trash"></i></button>
+        </td>
+      </tr>
+    `).join(''));
+  }
+  renderPagination('purchasesPagination','purchasesPaginationInfo', filtered.length, purchasePage, state.PAGE_SIZE, p => { purchasePage=p; renderPurchases(); });
+}
+
+$('#purchaseSearch').on('input', () => { purchasePage=1; renderPurchases(); });
+$('#purchaseFilterBtn').on('click', () => { purchasePage=1; renderPurchases(); });
+
+$('#addPurchaseBtn').on('click', () => {
+  purLineCount = 0;
+  $('#purLines').html('');
+  $('#purInvoice').val('');
+  $('#purDate').val(today());
+  $('#purSupplier').val('');
+  $('#purTotal').text('₹0.00');
+  addLine('pur');
+  new bootstrap.Modal('#purchaseModal').show();
+});
+
+$('#addPurLine').on('click', () => addLine('pur'));
+
+$('#savePurchaseBtn').on('click', async () => {
+  const supplier_id = $('#purSupplier').val() || null;
+  const invoice_number = $('#purInvoice').val().trim();
+  const purchase_date  = $('#purDate').val();
+  if (!invoice_number || !purchase_date) return toast('Invoice and Date are required', 'warn');
+  const lines = getLines('pur');
+  if (lines.length === 0) return toast('Add at least one item', 'warn');
+
+  loader(true);
+  const { data: pur, error } = await sb.from('purchases').insert({ supplier_id, invoice_number, purchase_date }).select().single();
+  if (error) { loader(false); return toast(error.message, 'error'); }
+
+  const lineRows = lines.map(l => ({ ...l, purchase_id: pur.id }));
+  const { error: le } = await sb.from('purchase_items').insert(lineRows);
+  loader(false);
+  if (le) return toast(le.message, 'error');
+  bootstrap.Modal.getInstance('#purchaseModal')?.hide();
+  toast('Purchase saved!', 'success');
+  await loadAllData();
+});
+
+function viewPurchase(id) {
+  const p = state.purchases.find(x => x.id === id);
+  if (!p) return;
+  const items = (p.purchase_items || []).map(i => `
+    <tr>
+      <td>${i.products?.name || '—'}</td>
+      <td class="mono">${i.quantity} ${i.products?.unit || ''}</td>
+      <td class="mono">${fmt(i.price)}</td>
+      <td class="mono">${fmt(i.subtotal)}</td>
+    </tr>
+  `).join('');
+  $('#viewPurchaseBody').html(`
+    <div class="row mb-3">
+      <div class="col-6"><strong>Invoice:</strong> <span class="mono">${p.invoice_number}</span></div>
+      <div class="col-6"><strong>Date:</strong> ${fmtDate(p.purchase_date)}</div>
+      <div class="col-6 mt-2"><strong>Supplier:</strong> ${p.suppliers?.name || '—'}</div>
+      <div class="col-6 mt-2"><strong>Total:</strong> <span class="mono text-accent2">${fmt(p.total_amount)}</span></div>
+    </div>
+    <table class="table"><thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr></thead><tbody>${items}</tbody></table>
+  `);
+  new bootstrap.Modal('#viewPurchaseModal').show();
+}
+
+async function deletePurchase(id) {
+  if (!await confirm2('Delete this purchase? Stock will be reversed.')) return;
+  loader(true);
+  // Delete items first (triggers will reverse stock)
+  await sb.from('purchase_items').delete().eq('purchase_id', id);
+  const { error } = await sb.from('purchases').delete().eq('id', id);
+  loader(false);
+  if (error) return toast(error.message, 'error');
+  toast('Purchase deleted', 'success');
+  await loadAllData();
+}
+
+// ═══════════════════════════════════════════
+// SALES
+// ═══════════════════════════════════════════
+let salePage = 1;
+
+function getFilteredSales() {
+  const q   = $('#saleSearch').val().toLowerCase();
+  const df  = $('#saleDateFrom').val();
+  const dt  = $('#saleDateTo').val();
+  return state.sales.filter(s =>
+    (!q || s.invoice_number.toLowerCase().includes(q) || (s.customer_name || '').toLowerCase().includes(q)) &&
+    (!df || s.sale_date >= df) &&
+    (!dt || s.sale_date <= dt)
+  );
+}
+
+function renderSales() {
+  const filtered = getFilteredSales();
+  const items = paginate(filtered, salePage, state.PAGE_SIZE);
+  if (items.length === 0) {
+    $('#salesTable').html('<tr><td colspan="6" class="text-center text-muted py-4">No sales found</td></tr>');
+  } else {
+    $('#salesTable').html(items.map(s => `
+      <tr>
+        <td class="mono">${s.invoice_number}</td>
+        <td>${fmtDate(s.sale_date)}</td>
+        <td>${s.customer_name || '—'}</td>
+        <td>${(s.sales_items || []).length} item(s)</td>
+        <td class="mono text-accent">${fmt(s.total_amount)}</td>
+        <td>
+          <button class="btn btn-sm" style="background:var(--accent-dim);color:var(--accent);border:none" onclick="viewSale('${s.id}')"><i class="bi bi-eye"></i></button>
+          <button class="btn btn-sm ms-1" style="background:rgba(255,107,107,0.15);color:var(--danger);border:none" onclick="deleteSale('${s.id}')"><i class="bi bi-trash"></i></button>
+        </td>
+      </tr>
+    `).join(''));
+  }
+  renderPagination('salesPagination','salesPaginationInfo', filtered.length, salePage, state.PAGE_SIZE, p => { salePage=p; renderSales(); });
+}
+
+$('#saleSearch').on('input', () => { salePage=1; renderSales(); });
+$('#saleFilterBtn').on('click', () => { salePage=1; renderSales(); });
+
+$('#addSaleBtn').on('click', () => {
+  salLineCount = 0;
+  $('#salLines').html('');
+  $('#salInvoice').val('');
+  $('#salDate').val(today());
+  $('#salCustomer').val('');
+  $('#salTotal').text('₹0.00');
+  addLine('sal');
+  new bootstrap.Modal('#saleModal').show();
+});
+
+$('#addSalLine').on('click', () => addLine('sal'));
+
+$('#saveSaleBtn').on('click', async () => {
+  const customer_name  = $('#salCustomer').val().trim() || null;
+  const invoice_number = $('#salInvoice').val().trim();
+  const sale_date      = $('#salDate').val();
+  if (!invoice_number || !sale_date) return toast('Invoice and Date are required', 'warn');
+  const lines = getLines('sal');
+  if (lines.length === 0) return toast('Add at least one item', 'warn');
+
+  // Validate stock
+  for (const l of lines) {
+    const prod = state.products.find(p => p.id === l.product_id);
+    if (prod && prod.current_stock < l.quantity) {
+      return toast(`Insufficient stock for ${prod.name}. Available: ${prod.current_stock} ${prod.unit}`, 'error');
+    }
+  }
+
+  loader(true);
+  const { data: sal, error } = await sb.from('sales').insert({ customer_name, invoice_number, sale_date }).select().single();
+  if (error) { loader(false); return toast(error.message, 'error'); }
+
+  const lineRows = lines.map(l => ({ ...l, sale_id: sal.id }));
+  const { error: le } = await sb.from('sales_items').insert(lineRows);
+  loader(false);
+  if (le) return toast(le.message, 'error');
+  bootstrap.Modal.getInstance('#saleModal')?.hide();
+  toast('Sale saved!', 'success');
+  await loadAllData();
+});
+
+function viewSale(id) {
+  const s = state.sales.find(x => x.id === id);
+  if (!s) return;
+  const items = (s.sales_items || []).map(i => `
+    <tr>
+      <td>${i.products?.name || '—'}</td>
+      <td class="mono">${i.quantity} ${i.products?.unit || ''}</td>
+      <td class="mono">${fmt(i.price)}</td>
+      <td class="mono">${fmt(i.subtotal)}</td>
+    </tr>
+  `).join('');
+  $('#viewSaleBody').html(`
+    <div class="row mb-3">
+      <div class="col-6"><strong>Invoice:</strong> <span class="mono">${s.invoice_number}</span></div>
+      <div class="col-6"><strong>Date:</strong> ${fmtDate(s.sale_date)}</div>
+      <div class="col-6 mt-2"><strong>Customer:</strong> ${s.customer_name || '—'}</div>
+      <div class="col-6 mt-2"><strong>Total:</strong> <span class="mono text-accent">${fmt(s.total_amount)}</span></div>
+    </div>
+    <table class="table"><thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr></thead><tbody>${items}</tbody></table>
+  `);
+  new bootstrap.Modal('#viewSaleModal').show();
+}
+
+async function deleteSale(id) {
+  if (!await confirm2('Delete this sale? Stock will be restored.')) return;
+  loader(true);
+  await sb.from('sales_items').delete().eq('sale_id', id);
+  const { error } = await sb.from('sales').delete().eq('id', id);
+  loader(false);
+  if (error) return toast(error.message, 'error');
+  toast('Sale deleted', 'success');
+  await loadAllData();
+}
+
+// ═══════════════════════════════════════════
+// REPORTS
+// ═══════════════════════════════════════════
+let reportData = [];
+
+$('#runReportBtn').on('click', runReport);
+
+async function runReport() {
+  const type = $('#reportType').val();
+  const df   = $('#reportDateFrom').val();
+  const dt   = $('#reportDateTo').val();
+  reportData = [];
+
+  if (type === 'stock') {
+    $('#reportTitle').text('Stock Report');
+    $('#reportTableHead').html('<tr><th>Product</th><th>Category</th><th>SKU</th><th>Unit</th><th>Opening Stock</th><th>Current Stock</th><th>Status</th></tr>');
+    reportData = state.products;
+    $('#reportTableBody').html(reportData.map(p => `
+      <tr>
+        <td>${p.name}</td>
+        <td><span class="cat-badge cat-${p.category.replace(' ','-')}">${p.category}</span></td>
+        <td class="mono">${p.sku}</td>
+        <td>${p.unit}</td>
+        <td class="mono">${p.opening_stock}</td>
+        <td class="mono ${p.current_stock <= p.min_stock_alert ? 'stock-low' : 'stock-ok'}">${p.current_stock}</td>
+        <td>${p.current_stock <= p.min_stock_alert ? '<span class="cat-badge" style="background:rgba(255,107,107,0.15);color:var(--danger)">Low Stock</span>' : '<span class="cat-badge cat-Spare-Parts">OK</span>'}</td>
+      </tr>
+    `).join(''));
+
+  } else if (type === 'purchases') {
+    $('#reportTitle').text('Purchase Report');
+    $('#reportTableHead').html('<tr><th>Invoice</th><th>Date</th><th>Supplier</th><th>Product</th><th>Category</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr>');
+    let rows = [];
+    state.purchases.forEach(pu => {
+      if ((df && pu.purchase_date < df) || (dt && pu.purchase_date > dt)) return;
+      (pu.purchase_items || []).forEach(pi => {
+        rows.push({ invoice: pu.invoice_number, date: pu.purchase_date, supplier: pu.suppliers?.name || '—', product: pi.products?.name || '—', category: pi.products?.category || '—', qty: pi.quantity, unit: pi.products?.unit || '', price: pi.price, subtotal: pi.subtotal });
+      });
+    });
+    reportData = rows;
+    $('#reportTableBody').html(rows.length ? rows.map(r => `
+      <tr>
+        <td class="mono">${r.invoice}</td>
+        <td>${fmtDate(r.date)}</td>
+        <td>${r.supplier}</td>
+        <td>${r.product}</td>
+        <td><span class="cat-badge cat-${r.category.replace(' ','-')}">${r.category}</span></td>
+        <td class="mono">${r.qty} ${r.unit}</td>
+        <td class="mono">${fmt(r.price)}</td>
+        <td class="mono">${fmt(r.subtotal)}</td>
+      </tr>
+    `).join('') : '<tr><td colspan="8" class="text-center text-muted py-4">No data</td></tr>');
+
+  } else if (type === 'sales') {
+    $('#reportTitle').text('Sales Report');
+    $('#reportTableHead').html('<tr><th>Invoice</th><th>Date</th><th>Customer</th><th>Product</th><th>Category</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr>');
+    let rows = [];
+    state.sales.forEach(sa => {
+      if ((df && sa.sale_date < df) || (dt && sa.sale_date > dt)) return;
+      (sa.sales_items || []).forEach(si => {
+        rows.push({ invoice: sa.invoice_number, date: sa.sale_date, customer: sa.customer_name || '—', product: si.products?.name || '—', category: si.products?.category || '—', qty: si.quantity, unit: si.products?.unit || '', price: si.price, subtotal: si.subtotal });
+      });
+    });
+    reportData = rows;
+    $('#reportTableBody').html(rows.length ? rows.map(r => `
+      <tr>
+        <td class="mono">${r.invoice}</td>
+        <td>${fmtDate(r.date)}</td>
+        <td>${r.customer}</td>
+        <td>${r.product}</td>
+        <td><span class="cat-badge cat-${r.category.replace(' ','-')}">${r.category}</span></td>
+        <td class="mono">${r.qty} ${r.unit}</td>
+        <td class="mono">${fmt(r.price)}</td>
+        <td class="mono">${fmt(r.subtotal)}</td>
+      </tr>
+    `).join('') : '<tr><td colspan="8" class="text-center text-muted py-4">No data</td></tr>');
+  }
+}
+
+$('#exportCsvBtn').on('click', () => {
+  if (!reportData.length) return toast('Run a report first', 'warn');
+  const ws = XLSX.utils.json_to_sheet(reportData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Report');
+  XLSX.writeFile(wb, `stockmate_report_${$('#reportType').val()}_${today()}.xlsx`);
+  toast('Report exported!', 'success');
+});
+
+$('#printReportBtn').on('click', () => {
+  window.print();
+});
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+$(document).ready(() => {
+  initAuth();
+});
+</script>
+</body>
+</html>
